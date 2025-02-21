@@ -3,6 +3,7 @@ class_name ShrimpServer
 
 @onready var server := TCPServer.new()
 @onready var camera_process: CameraProcess = $'camera-process'
+@onready var motor_manager: MotorManager = %'motor-manager'
 
 var status_timer := Timer.new()
 var peers :Array[StreamPeerTCP] = []
@@ -89,6 +90,8 @@ func _poll_peers() ->void :
 
 
 func _pull_message(peer :StreamPeerTCP) -> void :
+	if peer.get_available_bytes() == 0:
+		return
 	var payload_variant :Variant = peer.get_var()
 	if payload_variant == null :
 		printerr('[SRV] Received a null variant payload from %s'%peer.get_connected_host())

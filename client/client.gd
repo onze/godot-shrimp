@@ -28,6 +28,7 @@ func _log(text :String) -> void :
 		log_scroll_container.scroll_vertical = int(log_scroll_container.get_v_scroll_bar().max_value)
 	).call_deferred()
 
+
 func _ready() -> void :
 	## self init
 	name = 'client_root'
@@ -42,6 +43,7 @@ func _ready() -> void :
 	SignalBus.signals.log.connect(_log)
 	SignalBus.signals.new_command.connect(_on_new_command)
 	SignalBus.RegisterCommandHandler(-Command.NAME.PING, _on_pong)
+
 	# stats timer
 	add_child(one_second_timer)
 	one_second_timer.timeout.connect(_on_chrono_timer)

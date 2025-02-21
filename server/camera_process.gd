@@ -94,11 +94,15 @@ func _start_libcamera(width :int, height :int, fps :int) -> void:
 			'-f', 'video4linux2',
 			'-i', '/dev/video0',
 			'-f', 'mjpeg',
-			'-vf', 'scale=%s:%s'%[String.num(width), String.num(height)],
+			'-vf', 'scale=%s:%s'%[String.num_int64(width), String.num_int64(height)],
 			'-preset', 'ultrafast',
 			'-tune', 'zerolatency',
 			'-movflags', '+faststart',
 			'-fflags', 'nobuffer',
+			# https://fotoforensics.com/analysis.php showed that ffmpeg defaults to subpixel sampling
+			# with YCbCr4:2:2 (2 1), which godot won't load. While a random jpeg is subsampled
+			# with YCbCr4:2:0 (2 2). This flag fixes it for Godot.
+			'-pix_fmt', 'yuvj420p',
 			'tcp://0.0.0.0:%s?listen'%Settings.instance.libcamera_stream_port,
 		])
 	print('[SRV] starting libcamera: %s %s'%[binary_path, ' '.join(args)])

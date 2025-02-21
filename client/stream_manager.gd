@@ -49,8 +49,8 @@ func _request_stream() -> void:
 	'''ask the server to open a libcamera stream for us'''
 	SignalBus.signals.new_command.emit(
 		Command.NAME.REQUEST_VIDEO_STREAM, {
-			width=400,
-			height=300,
+			width=Settings.instance.stream_resolution.x,
+			height=Settings.instance.stream_resolution.y,
 			fps=24,
 		}
 	)
@@ -162,6 +162,11 @@ func _update_frame()->void:
 	if frame_data.is_empty():
 		# there was nothing to extract to begin with
 		return
+
+	assert(frame_data[0] == 0xff)
+	assert(frame_data[1] == 0xd8)
+	assert(frame_data[frame_data.size()-2] == 0xff)
+	assert(frame_data[frame_data.size()-1] == 0xd9)
 	skipped_frames_count -= 1
 	var frame := Image.new()
 	var err = frame.load_jpg_from_buffer(frame_data)

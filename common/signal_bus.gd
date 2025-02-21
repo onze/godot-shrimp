@@ -1,6 +1,8 @@
 extends RefCounted
 class_name SignalBus
 
+const DEBUG := false
+
 class _Signals:
 	# main client / server
 	@warning_ignore('unused_signal')
@@ -55,7 +57,7 @@ static func Dispatch(payload :Dictionary) -> void:
 		__command_register.add_user_signal(signal_name, [{name='params', type=TYPE_DICTIONARY}])
 		return
 	var registered_signal := Signal(__command_register, signal_name)
-	if abs(command) not in [Command.NAME.PING]:
+	if DEBUG and abs(command) not in [Command.NAME.PING]:
 		print('RPC DISPATCH: %s'%CommandName(command))
 	registered_signal.emit(payload.get('params', {}))
 #endregion

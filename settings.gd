@@ -12,6 +12,7 @@ const RPI_IP := "192.168.0.166"
 var hostname := GetHostname()
 # --server-port
 var server_port := 6266
+var stream_resolution := Vector2(400, 300)
 
 ## SERVER
 # --server
@@ -39,6 +40,14 @@ var camera_feed_info :Dictionary = {
 }.get(hostname, {})
 var libcamera_stream_port := 6002
 
+var ggpio_chipid := '0'
+var propulsion_motor_phase_gpio := 6 # green
+var propulsion_motor_enable_gpio := 12 # yellow
+var rotation_motor_phase_gpio := 16 # grey
+var rotation_motor_enable_gpio := 19 # white
+var balast_motor_phase_gpio := 20 # green
+var balast_motor_enable_gpio := 26 # blue
+
 ## CLIENT
 # --client
 var is_client := true
@@ -54,13 +63,15 @@ var command_flush_rate :float = 5.
 var server_host := '<set by preset>'
 
 func preset_desktop2desktop() -> void:
-	server_host = 'onze-desktop.local'
+	#server_host = 'onze-desktop.local'
 	server_host = DESKTOP_IP
+	client_window_fullscreen = false
+	stream_resolution = Vector2(800, 600)
 func preset_rpi2desktop() -> void:
-	server_host = 'goshrimp.local'
+	#server_host = 'goshrimp.local'
 	server_host = RPI_IP
 func preset_rpi2steamdeck() -> void:
-	server_host = 'goshrimp.local'
+	#server_host = 'goshrimp.local'
 	server_host = RPI_IP
 	client_window_fullscreen = true
 
@@ -68,8 +79,8 @@ func _init() ->void :
 	assert(Settings.instance == null)
 	assert(is_client or camera_feed_info.is_empty(), 'Empty camera feed info on a server instance!')
 	Settings.instance = self
-	#preset_desktop2desktop()
-	preset_rpi2desktop()
+	#preset_rpi2desktop()
+	preset_rpi2steamdeck()
 
 func process_args() -> void :
 	for arg :String in OS.get_cmdline_user_args() :

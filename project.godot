@@ -13,11 +13,14 @@ config_version=5
 config/name="godot-shrimp"
 run/main_scene="res://root.tscn"
 config/features=PackedStringArray("4.4", "Forward Plus")
+run/max_fps=60
 config/icon="uid://cl483pbyyg07i"
 
 [debug]
 
 gdscript/warnings/unsafe_property_access=1
+settings/warnings/unsafe_property_access=1
+settings/max_fps=0
 
 [display]
 
@@ -33,7 +36,7 @@ run/main_run_args="--audio-driver Dummy -- --client --preset=rpi2desktop"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/script-dock/plugin.cfg")
+enabled=PackedStringArray("res://addons/ggpio/plugin.cfg", "res://addons/script-dock/plugin.cfg")
 
 [input]
 

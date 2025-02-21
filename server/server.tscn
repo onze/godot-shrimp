@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://dc403fimtm4s7"]
+[gd_scene load_steps=4 format=3 uid="uid://dc403fimtm4s7"]
 
 [ext_resource type="Script" uid="uid://x872ikkf0wm8" path="res://server/server.gd" id="1_ob30c"]
 [ext_resource type="Script" uid="uid://cl8scae1sqo3f" path="res://server/camera_process.gd" id="2_0wvpq"]
+[ext_resource type="Script" uid="uid://qv2087ognsm2" path="res://server/motor_manager.gd" id="3_u3pyk"]
 
 [node name="server-root" type="Node"]
 script = ExtResource("1_ob30c")
@@ -9,3 +10,7 @@ script = ExtResource("1_ob30c")
 [node name="camera-process" type="Node" parent="."]
 unique_name_in_owner = true
 script = ExtResource("2_0wvpq")
+
+[node name="motor-manager" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("3_u3pyk")

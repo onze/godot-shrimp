@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://dux786c1gq54s"]
+[gd_scene load_steps=8 format=3 uid="uid://dux786c1gq54s"]
 
 [ext_resource type="Script" uid="uid://b675tlubu3g75" path="res://client/client.gd" id="1_6t3qf"]
 [ext_resource type="Texture2D" uid="uid://c4t0sx66a0b5c" path="res://asset/arrow.png" id="2_7kp2r"]
@@ -6,6 +6,9 @@
 [ext_resource type="Texture2D" uid="uid://dxniy2uhknrs8" path="res://asset/filled_circle.png" id="3_7kp2r"]
 [ext_resource type="Script" uid="uid://c45y7teiy441" path="res://client/stream_manager.gd" id="5_sjp5b"]
 [ext_resource type="Script" uid="uid://b1hta1h1ps2sj" path="res://client/input_manager.gd" id="6_miugc"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_miugc"]
+font_size = 8
 
 [node name="client-root" type="Control"]
 custom_minimum_size = Vector2(1280, 800)
@@ -228,6 +231,37 @@ stretch_mode = 5
 unique_name_in_owner = true
 position = Vector2(64, 76)
 texture = ExtResource("3_7kp2r")
+
+[node name="translation-hbox" type="HFlowContainer" parent="virtual joystick/HBoxContainer/TextureRect"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -54.0
+offset_top = -40.0
+offset_right = 54.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_constants/h_separation = 0
+alignment = 2
+reverse_fill = true
+
+[node name="translation-label" type="Label" parent="virtual joystick/HBoxContainer/TextureRect/translation-hbox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 8
+text = "[-2.3, 6.8]"
+
+[node name="100th" type="Label" parent="virtual joystick/HBoxContainer/TextureRect/translation-hbox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 8
+text = "/100"
+label_settings = SubResource("LabelSettings_miugc")
+vertical_alignment = 2
 
 [node name="stream-man" type="Node" parent="."]
 unique_name_in_owner = true
