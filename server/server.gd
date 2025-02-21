@@ -1,32 +1,57 @@
 extends Control
 
-@onready var texture_rect :TextureRect = %texture
-@onready var video_container: AspectRatioContainer = texture_rect.get_parent()
-@onready var camera_feed_name_label :Label = %'camera-feed-name'
-@onready var server_status_label :Label = %'server-status'
-@onready var logs :ItemList = %'logs'
-@onready var log_scroll_container :ScrollContainer = %'log-scroll-container'
+@onready var label: RichTextLabel = %label
 @onready var server := TCPServer.new()
 
+var status_timer := Timer.new()
 var peers :Array[StreamPeerTCP] = []
 var cam_tex := CameraTexture.new()
 var _has_new_frame := false
 
+var _camera_frames_received := 0
+var _camera_frames_sent := 0
 
 func _log(text :String) -> void :
 	print(text)
-	logs.add_item(text)
-	log_scroll_container.set_deferred(
-		'scroll_vertical',
-		int(log_scroll_container.get_v_scroll_bar().max_value)
-	)
 
 func _ready() -> void :
-	logs.clear()
-	assert(video_container!=null)
+	get_window().title ='Shrimp Server'
+	get_window().size = Settings.instance.server_window_size
+	if Settings.instance.server_window_starts_visible:
+		DisplayServer.window_set_mode(DisplayServer.WindowMode.WINDOW_MODE_WINDOWED)
+		DisplayServer.window_move_to_foreground()
+
+	add_child(status_timer)
+	status_timer.timeout.connect(_update_status)
+	status_timer.start(1.)
 	_setup_camera_feed()
 	_setup_server()
 
+func _update_status() -> void :
+	var items := PackedStringArray()
+	# timestamp
+	var time_data := Time.get_time_dict_from_system()
+	items.append('[%s:%s:%s]'%[time_data['hour'], time_data['minute'], time_data['second']])
+
+	# connection status
+	if peers.is_empty() :
+		items.append('listening on %s:%s'%[
+			Settings.instance.server_host,
+			Settings.instance.server_port,
+		])
+	else :
+		items.append('%s peer%s'%[
+			peers.size(),
+			'' if peers.size() < 2 else 's',
+		])
+
+	# camera frame rate
+	items.append('fps: %s/%s'%[_camera_frames_received, _camera_frames_sent])
+	_camera_frames_received = 0
+	_camera_frames_sent = 0
+
+	# keep last
+	label.text = ' | '.join(items)
 
 func _setup_camera_feed() -> void :
 	_log('Setting up camera feed...')
@@ -34,29 +59,26 @@ func _setup_camera_feed() -> void :
 	if feeds.is_empty() :
 		_log('Found no camera feed!')
 		return
+	var selected_feed :CameraFeed = null
 	for feed :CameraFeed in feeds :
-		_log('Using feed %s'%[feed.get_name()])
-		camera_feed_name_label.text = feed.get_name()
-		#print(feed.get_datatype()) # 1==FEED_RGB
+		if feed.get_name() == Settings.instance.camera_feed_info.get('name'):
+			selected_feed = feed
+
+		print('######### ', feed.get_name())
 		var findex := 0
 		for format in feed.formats :
 			print(findex, ': ', format)
 			findex += 1
-		# X 124: 640x360@30 Motion-JPEG
-		# V 66: 800x600@24 YUYV 4:2:2
-		# V 42: 640x380@30 YUYV 4:2:2
-		feed.set_format(42, {})
-		cam_tex.camera_feed_id = feed.get_id()
-		cam_tex.camera_is_active = true
-		feed.frame_changed.connect(
-			(func()->void:
-				video_container.ratio = cam_tex.get_size().aspect()
-				),
-			CONNECT_ONE_SHOT
-		)
-		feed.frame_changed.connect(_on_feed_frame_changed)
-		texture_rect.texture = cam_tex
-		break
+	if selected_feed == null:
+		_log('Camera feed not found: %s'%[Settings.instance.camera_feed_info.get('name')])
+		return
+
+	var format_index :int = Settings.instance.camera_feed_info.get('format_index', 0)
+	_log('Using feed %s / index %s'%[selected_feed.get_name(), format_index])
+	selected_feed.set_format(format_index, {})
+	cam_tex.camera_feed_id = selected_feed.get_id()
+	cam_tex.camera_is_active = true
+	selected_feed.frame_changed.connect(_on_feed_frame_changed)
 
 
 func _setup_server() -> void :
@@ -66,7 +88,6 @@ func _setup_server() -> void :
 	var err := server.listen(settings.server_port)
 	if err != OK :
 		_log('error listening: %s/%s'%[err, error_string(err)])
-		server_status_label.text = error_string(err)
 		return
 	_log('server is listening on port %s'%[server.get_local_port()])
 
@@ -79,18 +100,11 @@ func _process(_delta :float) -> void :
 			peers.append(peer)
 			_log('new connection from %s'%[peer.get_connected_host()])
 			_has_new_frame = true
-
-		if peers.is_empty() :
-			server_status_label.text = 'listening...'
-		else :
-			server_status_label.text = '%s peer%s'%[
-			peers.size(),
-			'' if peers.size() < 2 else 's',
-			]
 	_send_last_frame()
 
 
 func _on_feed_frame_changed()->void :
+	_camera_frames_received += 1
 	if peers.is_empty() :
 		return
 	_has_new_frame = true
@@ -100,7 +114,11 @@ func _send_last_frame() ->void :
 	if peers.is_empty() or not _has_new_frame :
 		return
 	_has_new_frame = false
-	var frame :Image = cam_tex.get_image().duplicate()
+	var cam_image := cam_tex.get_image()
+	if cam_image == null:
+		print('Could not retrieve image from camera')
+		return
+	var frame :Image = cam_image.duplicate()
 	if frame == null :
 		return
 	var payload :Dictionary = {
@@ -122,3 +140,4 @@ func _send_last_frame() ->void :
 	# delete disconnected peers
 	for peer in delete_queue :
 		peers.erase(peer)
+	_camera_frames_sent += 1

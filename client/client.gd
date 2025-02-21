@@ -11,7 +11,7 @@ class_name ShrimpClient
 @onready var logs :ItemList = %'logs'
 @onready var log_scroll_container :ScrollContainer = %'log-scroll-container'
 
-var peer := StreamPeerTCP.new()
+var peer :StreamPeerTCP
 var byte_count :int = 0
 var frame_count :int = 0
 var one_second_timer := Timer.new()
@@ -31,7 +31,13 @@ func _log(text :String) -> void :
 
 func _ready() -> void :
 	name = 'client_root'
+	DisplayServer.set_icon(preload('res://asset/icon.client.png').get_image())
+	DisplayServer.window_set_title('Shrimp Client')
+	DisplayServer.window_set_size(Settings.instance.client_window_size)
+	DisplayServer.window_set_mode(DisplayServer.WindowMode.WINDOW_MODE_WINDOWED)
+	DisplayServer.window_move_to_foreground()
 	logs.clear()
+	peer = StreamPeerTCP.new()
 	_connect()
 	input_man = InputManager.new(_log, connected, disconnected)
 	add_child(input_man)
@@ -39,7 +45,7 @@ func _ready() -> void :
 	one_second_timer.timeout.connect(_on_chrono_timer)
 	one_second_timer.start(1.)
 
-	if Settings.instance.is_steam_os :
+	if Settings.IsSteamOS():
 		get_window().mode = Window.Mode.MODE_FULLSCREEN
 
 
@@ -73,7 +79,10 @@ func _process(_delta :float) -> void :
 
 func _connect() -> bool :
 	var settings := Settings.instance
-	connection_status_label.text = 'connecting...'
+	connection_status_label.text = 'connecting to %s:%s...'%[
+		settings.server_host,
+		settings.server_port,
+	]
 	var err := peer.connect_to_host(settings.server_host, settings.server_port)
 	if err != OK :
 		_log('Could not connect to server on %s:%s'%[
