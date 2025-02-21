@@ -19,9 +19,17 @@ var is_server := false
 var server_window_size := Vector2i(800, 32)
 var server_window_starts_visible := hostname in ['onze-desktop']
 var camera_feed_info :Dictionary = {
-	# ? 0: ?x?@? YUYV 4:2:2
-	# ? 2: ?x?@? YUYV 4:2:2
-	'goshrimp' = { name='unicam', format_index=0 },
+	# 254: 480x320@? 16-bit RGB 8-8-8
+	# 411: 800x600@? 16-bit RGB 8-8-8
+	# 417: 1280x720@? 16-bit RGB 8-8-8
+	# 254: 480x320@? 24-bit RGB 8-8-8
+	# 261: 800x600@? 24-bit RGB 8-8-8
+	# 267: 1280x720@? 24-bit RGB 8-8-8
+	'goshrimp' = {
+		index=0,
+		#name='/base/soc/i2c0mux/i2c@1/imx708@',
+		format_index=254
+	},
 	# ? 1: 640x480@24 YUYV 4:2:2
 	# X 124: 640x360@30 Motion-JPEG
 	# V 66: 800x600@24 YUYV 4:2:2
@@ -78,8 +86,17 @@ func process_args() -> void :
 				server_host = value
 			'--server-port' :
 				server_port = int(value)
+			'--list-camera' :
+				ShrimpServer.ListCameraFeeds()
+			'--camera-feed-index' :
+				camera_feed_info['index'] = int(value)
 			'--camera-feed-format' :
 				camera_feed_info['format_index'] = int(value)
+			'--preset':
+				match value:
+					'desktop2desktop': preset_desktop2desktop()
+					'rpi2desktop': preset_rpi2desktop()
+					'rpi2steamdeck': preset_rpi2steamdeck()
 
 	#
 	assert(is_client != is_server)

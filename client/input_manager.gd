@@ -25,6 +25,7 @@ var _log_callable :Callable
 func _log(text :String) -> void:
 	_log_callable.call(text)
 
+
 func _init(log_callable :Callable, connected :Signal, disconnected :Signal) -> void :
 	_log_callable = log_callable
 	connected.connect(_on_connected)

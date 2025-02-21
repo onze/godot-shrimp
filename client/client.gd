@@ -76,7 +76,6 @@ func _process(_delta :float) -> void :
 						peer = StreamPeerTCP.new()
 				)
 
-
 func _connect() -> bool :
 	var settings := Settings.instance
 	connection_status_label.text = 'connecting to %s:%s...'%[
@@ -89,6 +88,7 @@ func _connect() -> bool :
 		settings.server_host,
 		settings.server_port,
 		])
+		disconnected.emit()
 		return false
 	peer.poll()
 	if peer.get_status() == StreamPeerTCP.STATUS_CONNECTED :

@@ -1,4 +1,5 @@
 extends Control
+class_name ShrimpServer
 
 @onready var label: RichTextLabel = %label
 @onready var server := TCPServer.new()
@@ -53,6 +54,17 @@ func _update_status() -> void :
 	# keep last
 	label.text = ' | '.join(items)
 
+static func ListCameraFeeds() -> void :
+	var feeds := CameraServer.feeds()
+	var feed_index := 0
+	for feed :CameraFeed in feeds :
+		print('######### %s: %s'%[feed_index, feed.get_name()])
+		var findex := 0
+		for format in feed.formats :
+			print(findex, ': ', format, ' data type: ', feed.get_datatype())
+			findex += 1
+		feed_index += 1
+
 func _setup_camera_feed() -> void :
 	_log('Setting up camera feed...')
 	var feeds := CameraServer.feeds()
@@ -60,21 +72,31 @@ func _setup_camera_feed() -> void :
 		_log('Found no camera feed!')
 		return
 	var selected_feed :CameraFeed = null
-	for feed :CameraFeed in feeds :
-		if feed.get_name() == Settings.instance.camera_feed_info.get('name'):
-			selected_feed = feed
-
-		print('######### ', feed.get_name())
-		var findex := 0
-		for format in feed.formats :
-			print(findex, ': ', format)
-			findex += 1
+	var feed_index :int = Settings.instance.camera_feed_info.get('index', -1)
+	var selected_feed_index :int = feed_index
+	if feed_index < 0:
+		for feed :CameraFeed in feeds :
+			if selected_feed == null:
+				if feed_index == Settings.instance.camera_feed_info.get('index', -1):
+					selected_feed_index = feed_index
+					selected_feed = feed
+				elif feed.get_name() == Settings.instance.camera_feed_info.get('name', ''):
+					selected_feed_index = feed_index
+					selected_feed = feed
+			feed_index += 1
+	else:
+		selected_feed = feeds[feed_index]
 	if selected_feed == null:
 		_log('Camera feed not found: %s'%[Settings.instance.camera_feed_info.get('name')])
 		return
 
 	var format_index :int = Settings.instance.camera_feed_info.get('format_index', 0)
-	_log('Using feed %s / index %s'%[selected_feed.get_name(), format_index])
+	_log('Using feed index %s (%s id %s) / index %s'%[
+		selected_feed_index,
+		selected_feed.get_name(),
+		selected_feed.get_id(),
+		format_index,
+	])
 	selected_feed.set_format(format_index, {})
 	cam_tex.camera_feed_id = selected_feed.get_id()
 	cam_tex.camera_is_active = true
