@@ -1,26 +1,11 @@
-[gd_scene load_steps=2 format=3 uid="uid://dc403fimtm4s7"]
+[gd_scene load_steps=3 format=3 uid="uid://dc403fimtm4s7"]
 
 [ext_resource type="Script" uid="uid://x872ikkf0wm8" path="res://server/server.gd" id="1_ob30c"]
+[ext_resource type="Script" uid="uid://cl8scae1sqo3f" path="res://server/camera_process.gd" id="2_0wvpq"]
 
-[node name="server-root" type="Control"]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
+[node name="server-root" type="Node"]
 script = ExtResource("1_ob30c")
 
-[node name="label" type="RichTextLabel" parent="."]
+[node name="camera-process" type="Node" parent="."]
 unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-bbcode_enabled = true
-text = "[12:23:54] | connected | 1 peer | iop | haha | 123 watts | ok ok ok"
-autowrap_mode = 0
+script = ExtResource("2_0wvpq")

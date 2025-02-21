@@ -16,8 +16,7 @@ var server_port := 6266
 ## SERVER
 # --server
 var is_server := false
-var server_window_size := Vector2i(800, 32)
-var server_window_starts_visible := hostname in ['onze-desktop']
+var camera_startup_delay_s :float = 2
 var camera_feed_info :Dictionary = {
 	# 254: 480x320@? 16-bit RGB 8-8-8
 	# 411: 800x600@? 16-bit RGB 8-8-8
@@ -38,36 +37,39 @@ var camera_feed_info :Dictionary = {
 	# V 46: 640x380@10 YUYV 4:2:2
 	'onze-desktop' = { name='HD Webcam C615', format_index=66},
 }.get(hostname, {})
+var libcamera_stream_port := 6002
 
 ## CLIENT
 # --client
 var is_client := true
 var client_window_size := Vector2i(1280, 800)
+var client_window_fullscreen := false
+# how long we try reconnections to the video stream before giving up and requesting a new stream
+var connection_timeout_s :float = 15
 # how long we wait after a disconnect before reconnecting
-var reconnection_delay_s :float = 3
+var reconnection_delay_s :float = 1
 # frequency at which we send commands to the shrimp
 var command_flush_rate :float = 5.
 # --server-host
 var server_host := '<set by preset>'
 
 func preset_desktop2desktop() -> void:
-	server_window_starts_visible = true
+	server_host = 'onze-desktop.local'
 	server_host = DESKTOP_IP
 func preset_rpi2desktop() -> void:
-	server_window_starts_visible = false
+	server_host = 'goshrimp.local'
 	server_host = RPI_IP
 func preset_rpi2steamdeck() -> void:
-	server_window_starts_visible = false
-	server_host = STEAMDECK_IP
+	server_host = 'goshrimp.local'
+	server_host = RPI_IP
+	client_window_fullscreen = true
 
 func _init() ->void :
 	assert(Settings.instance == null)
 	assert(is_client or camera_feed_info.is_empty(), 'Empty camera feed info on a server instance!')
 	Settings.instance = self
-	preset_desktop2desktop()
-	#preset_rpi2desktop()
-	#preset_rpi2steamdeck()
-
+	#preset_desktop2desktop()
+	preset_rpi2desktop()
 
 func process_args() -> void :
 	for arg :String in OS.get_cmdline_user_args() :
@@ -86,12 +88,17 @@ func process_args() -> void :
 				server_host = value
 			'--server-port' :
 				server_port = int(value)
-			'--list-camera' :
-				ShrimpServer.ListCameraFeeds()
-			'--camera-feed-index' :
-				camera_feed_info['index'] = int(value)
-			'--camera-feed-format' :
-				camera_feed_info['format_index'] = int(value)
+			#'--camera-feed-index' :
+				#camera_feed_info['index'] = int(value)
+			#'--camera-feed-format' :
+				#camera_feed_info['format_index'] = int(value)
+			'--fullscreen' :
+				if value.to_lower() in ['on', '1', 'true', 't', 'y', 'yes']:
+					client_window_fullscreen = true
+				elif value.to_lower() in ['off', '0', 'false', 'f', 'n', 'no']:
+					client_window_fullscreen = false
+				else:
+					print('Unsupported --fullscreen value: ', value)
 			'--preset':
 				match value:
 					'desktop2desktop': preset_desktop2desktop()
@@ -105,8 +112,8 @@ static func IsSteamOS() -> bool:
 	return OS.get_distribution_name().containsn("SteamOS")
 
 static func GetHostname() -> String:
-	if IsSteamOS():
-		return 'steamdeck'
+	#if IsSteamOS():
+		#return 'steamdeck'
 	var hostname_out :Array = []
-	OS.execute('hostname', [], hostname_out)
+	OS.execute('/usr/bin/hostnamectl', ['hostname'], hostname_out, true)
 	return ''.join(hostname_out).strip_edges()

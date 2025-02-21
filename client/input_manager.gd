@@ -21,17 +21,14 @@ var damping := .4
 func _damp(x :float, y :float)->float :
 	return x*damping+y*(1.-damping)
 
-var _log_callable :Callable
+signal log(s:String)
 func _log(text :String) -> void:
-	_log_callable.call(text)
+	log.emit(text)
 
 
-func _init(log_callable :Callable, connected :Signal, disconnected :Signal) -> void :
-	_log_callable = log_callable
-	connected.connect(_on_connected)
-	disconnected.connect(_on_disconnected)
-	name = 'input-man'
-
+func _init() -> void :
+	SignalBus.signals.connected.connect(_on_connected)
+	SignalBus.signals.disconnected.connect(_on_disconnected)
 
 func _ready() -> void :
 	owner = get_parent().owner
@@ -48,10 +45,15 @@ func _ready() -> void :
 func _on_connected() -> void :
 	_is_connected = true
 
-
 func _on_disconnected() -> void :
 	_is_connected = false
 
+func _unhandled_key_input(raw_event: InputEvent) -> void:
+	var event :InputEventKey = raw_event
+	print('[CLI] InputManager._unhandled_key_input: ', event)
+	match event.keycode:
+		KEY_TAB:
+			get_tree().quit()
 
 func _process(_delta :float)->void :
 	translation = Vector2.ZERO
@@ -76,19 +78,16 @@ func _process(_delta :float)->void :
 		_log('reset balast level')
 	_update_input_visualization()
 
-signal new_command(name :Command.NAME, args:Dictionary)
-
-
 func _flush_commands() -> void :
 	if _is_connected :
 		if translation != Vector2.ZERO :
-			new_command.emit(Command.NAME.TRANSLATE, {d=translation})
+			SignalBus.signals.new_command.emit(Command.NAME.TRANSLATE, {d=translation})
 		if _balast_level_has_changed:
-			new_command.emit(Command.NAME.SET_BALAST_LEVEL, {l=_balast_level})
+			SignalBus.signals.new_command.emit(Command.NAME.SET_BALAST_LEVEL, {l=_balast_level})
 	# reset state
 	translation = Vector2.ZERO
 	_balast_level_has_changed = false
-		#print('%s~%s'%[Inputs.COMMAND.keys()[command], value])
+		#print('[CLI] %s~%s'%[Inputs.COMMAND.keys()[command], value])
 
 func _update_input_visualization() -> void :
 	# JOYSTICK
