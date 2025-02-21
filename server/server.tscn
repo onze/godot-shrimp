@@ -1,0 +1,113 @@
+[gd_scene load_steps=2 format=3 uid="uid://dc403fimtm4s7"]
+
+[ext_resource type="Script" uid="uid://x872ikkf0wm8" path="res://server/server.gd" id="1_ob30c"]
+
+[node name="server-root" type="Control"]
+custom_minimum_size = Vector2(800, 600)
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ob30c")
+
+[node name="AspectRatioContainer" type="AspectRatioContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+ratio = 1.3333
+stretch_mode = 1
+
+[node name="texture" type="TextureRect" parent="AspectRatioContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 100)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="top-spacer" type="Control" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 5.95
+
+[node name="bottom menu" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="status" type="VBoxContainer" parent="VBoxContainer/bottom menu"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 2
+
+[node name="spacer" type="Control" parent="VBoxContainer/bottom menu/status"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Panel" type="Panel" parent="VBoxContainer/bottom menu/status"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+size_flags_vertical = 8
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/bottom menu/status/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="camera feed name" type="Label" parent="VBoxContainer/bottom menu/status/Panel/HBoxContainer"]
+layout_mode = 2
+text = "Feed:"
+
+[node name="camera-feed-name" type="Label" parent="VBoxContainer/bottom menu/status/Panel/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "?"
+
+[node name="VSeparator" type="VSeparator" parent="VBoxContainer/bottom menu/status/Panel/HBoxContainer"]
+layout_mode = 2
+
+[node name="server status" type="Label" parent="VBoxContainer/bottom menu/status/Panel/HBoxContainer"]
+layout_mode = 2
+text = "Server:"
+
+[node name="server-status" type="Label" parent="VBoxContainer/bottom menu/status/Panel/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "?"
+
+[node name="logs" type="Panel" parent="VBoxContainer/bottom menu"]
+custom_minimum_size = Vector2(300, 200)
+layout_mode = 2
+
+[node name="log-scroll-container" type="ScrollContainer" parent="VBoxContainer/bottom menu/logs"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 3
+
+[node name="logs" type="ItemList" parent="VBoxContainer/bottom menu/logs/log-scroll-container"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+auto_height = true
+item_count = 1
+item_0/text = "test"

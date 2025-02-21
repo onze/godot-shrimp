@@ -1,0 +1,228 @@
+[gd_scene load_steps=5 format=3 uid="uid://dux786c1gq54s"]
+
+[ext_resource type="Script" uid="uid://b675tlubu3g75" path="res://client/client.gd" id="1_6t3qf"]
+[ext_resource type="Texture2D" uid="uid://c4t0sx66a0b5c" path="res://asset/arrow.png" id="2_7kp2r"]
+[ext_resource type="Texture2D" uid="uid://da68wgdxprtaj" path="res://asset/empty_circle.png" id="2_mgmel"]
+[ext_resource type="Texture2D" uid="uid://dxniy2uhknrs8" path="res://asset/filled_circle.png" id="3_7kp2r"]
+
+[node name="client-root" type="Control"]
+custom_minimum_size = Vector2(1280, 800)
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_6t3qf")
+
+[node name="AspectRatioContainer" type="AspectRatioContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+ratio = 1.6035
+stretch_mode = 1
+
+[node name="texture" type="TextureRect" parent="AspectRatioContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 100)
+layout_mode = 2
+size_flags_vertical = 3
+expand_mode = 1
+stretch_mode = 6
+
+[node name="debug menu" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="top-spacer" type="Control" parent="debug menu"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 5.95
+
+[node name="bottom menu" type="HBoxContainer" parent="debug menu"]
+layout_mode = 2
+
+[node name="status" type="VBoxContainer" parent="debug menu/bottom menu"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 2
+
+[node name="spacer" type="Control" parent="debug menu/bottom menu/status"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Panel" type="Panel" parent="debug menu/bottom menu/status"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+size_flags_vertical = 8
+
+[node name="HBoxContainer" type="HBoxContainer" parent="debug menu/bottom menu/status/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="connection status" type="Label" parent="debug menu/bottom menu/status/Panel/HBoxContainer"]
+layout_mode = 2
+text = "Status:"
+
+[node name="connection-status" type="Label" parent="debug menu/bottom menu/status/Panel/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "?"
+
+[node name="VSeparator" type="VSeparator" parent="debug menu/bottom menu/status/Panel/HBoxContainer"]
+layout_mode = 2
+
+[node name="delta t" type="Label" parent="debug menu/bottom menu/status/Panel/HBoxContainer"]
+layout_mode = 2
+text = "Δt:"
+
+[node name="delta-t" type="Label" parent="debug menu/bottom menu/status/Panel/HBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(55, 0)
+layout_mode = 2
+text = "200ms"
+
+[node name="VSeparator2" type="VSeparator" parent="debug menu/bottom menu/status/Panel/HBoxContainer"]
+layout_mode = 2
+
+[node name="byte rate" type="Label" parent="debug menu/bottom menu/status/Panel/HBoxContainer"]
+layout_mode = 2
+text = "B/s:"
+
+[node name="byte-rate" type="Label" parent="debug menu/bottom menu/status/Panel/HBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(70, 0)
+layout_mode = 2
+text = "13.7Mbs"
+
+[node name="VSeparator3" type="VSeparator" parent="debug menu/bottom menu/status/Panel/HBoxContainer"]
+layout_mode = 2
+
+[node name="frame rate" type="Label" parent="debug menu/bottom menu/status/Panel/HBoxContainer"]
+layout_mode = 2
+text = "fps:"
+
+[node name="frame-rate" type="Label" parent="debug menu/bottom menu/status/Panel/HBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(20, 0)
+layout_mode = 2
+text = "00"
+
+[node name="VSeparator5" type="VSeparator" parent="debug menu/bottom menu/status/Panel/HBoxContainer"]
+layout_mode = 2
+
+[node name="resolution" type="Label" parent="debug menu/bottom menu/status/Panel/HBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(20, 0)
+layout_mode = 2
+text = "800x600"
+
+[node name="VSeparator4" type="VSeparator" parent="debug menu/bottom menu/status/Panel/HBoxContainer"]
+layout_mode = 2
+
+[node name="logs" type="Panel" parent="debug menu/bottom menu"]
+custom_minimum_size = Vector2(300, 200)
+layout_mode = 2
+
+[node name="log-scroll-container" type="ScrollContainer" parent="debug menu/bottom menu/logs"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 3
+
+[node name="logs" type="ItemList" parent="debug menu/bottom menu/logs/log-scroll-container"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+auto_height = true
+item_count = 1
+item_0/text = "log line"
+
+[node name="virtual joystick" type="Control" parent="."]
+custom_minimum_size = Vector2(150, 150)
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_top = -75.0
+offset_right = 150.0
+offset_bottom = 75.0
+grow_vertical = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="virtual joystick"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="depth-slider" type="VSlider" parent="virtual joystick/HBoxContainer"]
+layout_mode = 2
+max_value = 1.0
+step = 0.01
+editable = false
+scrollable = false
+
+[node name="balast-up" type="TextureRect" parent="virtual joystick/HBoxContainer/depth-slider"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -5.0
+offset_top = 1.0
+offset_right = 94.0
+offset_bottom = 162.0
+grow_horizontal = 2
+scale = Vector2(0.1, 0.1)
+texture = ExtResource("2_7kp2r")
+stretch_mode = 3
+
+[node name="balast-down" type="TextureRect" parent="virtual joystick/HBoxContainer/depth-slider"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -5.0
+offset_top = -16.0
+offset_right = 94.0
+offset_bottom = 145.0
+grow_horizontal = 2
+grow_vertical = 0
+scale = Vector2(0.1, 0.1)
+texture = ExtResource("2_7kp2r")
+stretch_mode = 3
+flip_v = true
+
+[node name="TextureRect" type="TextureRect" parent="virtual joystick/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+texture = ExtResource("2_mgmel")
+stretch_mode = 5
+
+[node name="joystick-handle" type="Sprite2D" parent="virtual joystick/HBoxContainer/TextureRect"]
+unique_name_in_owner = true
+position = Vector2(64, 76)
+texture = ExtResource("3_7kp2r")
