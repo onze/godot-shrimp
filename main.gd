@@ -19,10 +19,10 @@ func _ready()->void :
 func _load_client_server_scene()->void :
 	if Settings.instance.is_client :
 		print('starting as client')
-		add_child(preload('res://client/client.tscn').instantiate())
+		get_tree().change_scene_to_file('res://client/client.tscn')
 	else :
 		print('starting as server')
-		add_child(preload('res://server/server.tscn').instantiate())
+		get_tree().change_scene_to_file('res://server/server.tscn')
 
 
 func _process(_delta :float)->void :
