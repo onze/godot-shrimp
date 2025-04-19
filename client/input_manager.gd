@@ -7,6 +7,8 @@ var balast_up: TextureRect
 var balast_down: TextureRect
 var translation_hbox: HFlowContainer
 var translation_label: Label
+var balast_positive_energy_slider: ProgressBar
+var balast_negative_energy_slider: ProgressBar
 
 #
 var _is_connected := false
@@ -17,9 +19,11 @@ var tx_force :float = ProjectSettings.get_setting('application/run/max_fps')
 var tx_damping := .85
 var tx_deadzone := 0.01
 # [0, 1]
-var _balast_level :float = .5
+var _balast_level :float = 0
 var _balast_level_has_changed := false
+# increment added by pressing an input
 var _balast_delta :float = 1.
+const BALAST_ZERO_TOLERANCE :float = 0.2
 # input is aggregated at a local  high rate,
 # and flushed to the shrimp at a lower rate
 var command_flush_timer := Timer.new()
@@ -40,10 +44,13 @@ func _ready() -> void :
 	balast_down = get_tree().root.find_child('balast-down', true, false)
 	translation_hbox = get_tree().root.find_child('translation-hbox', true, false)
 	translation_label = get_tree().root.find_child('translation-label', true, false)
+	balast_positive_energy_slider = get_tree().root.find_child('balast-positive-energy-slider', true, false)
+	balast_negative_energy_slider = get_tree().root.find_child('balast-negative-energy-slider', true, false)
 	assert(joystick_handle!=null)
 	add_child(command_flush_timer)
 	command_flush_timer.timeout.connect(_flush_commands)
 	command_flush_timer.start(1./Settings.instance.command_flush_rate)
+	SignalBus.RegisterCommandHandler(-Command.NAME.TRANSLATE, _on_server_translate_response)
 
 func _on_connected() -> void :
 	_is_connected = true
@@ -55,7 +62,7 @@ func _unhandled_key_input(raw_event: InputEvent) -> void:
 	var event :InputEventKey = raw_event
 	print('[CLI] InputManager._unhandled_key_input: ', event)
 	match event.keycode:
-		KEY_TAB:
+		[KEY_TAB, KEY_ESCAPE]:
 			get_tree().quit()
 
 func _process(delta :float)->void :
@@ -68,6 +75,7 @@ func _process(delta :float)->void :
 		tx_delta.x += -Input.get_action_strength("left")*delta*tx_force
 	if Input.is_action_pressed("right") :
 		tx_delta.x += Input.get_action_strength("right")*delta*tx_force
+
 	balast_up.visible = Input.is_action_pressed("up")
 	if balast_up.visible:
 		_balast_level += _balast_delta*delta
@@ -76,9 +84,8 @@ func _process(delta :float)->void :
 	if balast_down.visible:
 		_balast_level -= _balast_delta*delta
 		_balast_level_has_changed = true
-	if balast_up.visible and balast_down.visible and not is_equal_approx(_balast_level, .5):
-		_balast_level = .5
-		_log('reset balast level')
+	if balast_up.visible and balast_down.visible and not is_equal_approx(_balast_level, 0):
+		stop_balast()
 
 	translation = translation*tx_damping+tx_delta*(1.-tx_damping)
 	# when no input is seen, and we're damping tx under the deadzone
@@ -86,13 +93,28 @@ func _process(delta :float)->void :
 		translation = Vector2.ZERO
 	_update_input_visualization()
 
+func stop_balast() -> void:
+	_balast_level = 0
+	_balast_level_has_changed = true
+	SignalBus.signals.new_command.emit(Command.NAME.TRANSLATE, {d=Vector3(INF, 0, INF)})
+
+func reset_balast_calibration() -> void :
+	SignalBus.signals.new_command.emit(Command.NAME.BALAST_RESET_CALIBRATION, {})
+
 func _flush_commands() -> void :
 	if _is_connected :
+		var delta := Vector3.INF
+		var flush := false
 		if not translation.is_zero_approx() or not _last_tx_was_zero:
-			SignalBus.signals.new_command.emit(Command.NAME.TRANSLATE, {d=translation})
+			delta.x = translation.x
+			delta.z = translation.y
+			flush = true
 		_last_tx_was_zero = translation.is_zero_approx()
 		if _balast_level_has_changed:
-			SignalBus.signals.new_command.emit(Command.NAME.SET_BALAST_LEVEL, {b=_balast_level})
+			delta.y = _balast_level
+			flush = true
+		if flush:
+			SignalBus.signals.new_command.emit(Command.NAME.TRANSLATE, {d=delta})
 	# reset state
 	_balast_level_has_changed = false
 
@@ -106,7 +128,25 @@ func _update_input_visualization() -> void :
 	translation_label.text = '[%d, %d]'%[translation.x*100, translation.y*100]
 
 	# BALAST SLIDER
-	_balast_level = clampf(_balast_level, 0., 1.)
+	_balast_level = clampf(_balast_level, -1., 1.)
 	var parent_size := Vector2.ONE * (minf(parent_rect.size.x, parent_rect.size.y)-joystick_handle.get_rect().size.x)
 	joystick_handle.position = center+(translation*Vector2(1., -1.))*parent_size/2.
 	depth_slider.value = _balast_level
+
+func _on_server_translate_response(args := {}) -> void:
+	var balast_energy_ratio :float = args.get('balast_energy_ratio', NAN)
+	if not is_nan(balast_energy_ratio):
+		if balast_energy_ratio >= .5:
+			var mapped_balast_energy_ratio := lerpf(0, 1, inverse_lerp(.5, 1, balast_energy_ratio))
+			balast_positive_energy_slider.value = mapped_balast_energy_ratio
+			balast_negative_energy_slider.value = 0
+		else:
+			var mapped_balast_energy_ratio := lerpf(0, 1, inverse_lerp(.5, 0, balast_energy_ratio))
+			balast_negative_energy_slider.value = mapped_balast_energy_ratio
+			balast_positive_energy_slider.value = 0
+
+	# reset balast input when energy has reached a min/max but we're still try to change it
+	if balast_energy_ratio <= 0 and _balast_level < 0:
+		stop_balast()
+	if balast_energy_ratio >= 1 and _balast_level > 0:
+		stop_balast()

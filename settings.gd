@@ -53,6 +53,9 @@ var balast_motor_enable_gpio := 26 # blue
 var is_client := true
 var client_window_size := Vector2i(1280, 800)
 var client_window_fullscreen := false
+
+# whether a successful connection to the server triggers a video stream request
+var open_video_stream_upon_connection := true
 # how long we try reconnections to the video stream before giving up and requesting a new stream
 var connection_timeout_s :float = 15
 # how long we wait after a disconnect before reconnecting
@@ -61,6 +64,7 @@ var reconnection_delay_s :float = 1
 var command_flush_rate :float = 5.
 # --server-host
 var server_host := '<set by preset>'
+var disable_video_stream := false
 
 func preset_desktop2desktop() -> void:
 	#server_host = 'onze-desktop.local'
@@ -70,10 +74,19 @@ func preset_desktop2desktop() -> void:
 func preset_rpi2desktop() -> void:
 	#server_host = 'goshrimp.local'
 	server_host = RPI_IP
+	client_window_fullscreen = false
+	stream_resolution = Vector2(400, 300)
 func preset_rpi2steamdeck() -> void:
 	#server_host = 'goshrimp.local'
 	server_host = RPI_IP
 	client_window_fullscreen = true
+	stream_resolution = Vector2(400, 300)
+func preset_desktop2steamdeck() -> void:
+	#server_host = 'onze-desktop.local'
+	server_host = DESKTOP_IP
+	client_window_fullscreen = true
+	stream_resolution = Vector2(400, 300)
+	disable_video_stream = true
 
 func _init() ->void :
 	assert(Settings.instance == null)
@@ -106,15 +119,21 @@ func process_args() -> void :
 			'--fullscreen' :
 				if value.to_lower() in ['on', '1', 'true', 't', 'y', 'yes']:
 					client_window_fullscreen = true
+					print('fullscreen: force enabled')
 				elif value.to_lower() in ['off', '0', 'false', 'f', 'n', 'no']:
 					client_window_fullscreen = false
+					print('fullscreen: force disabled')
 				else:
 					print('Unsupported --fullscreen value: ', value)
 			'--preset':
 				match value:
 					'desktop2desktop': preset_desktop2desktop()
+					'desktop2steamdeck': preset_desktop2steamdeck()
 					'rpi2desktop': preset_rpi2desktop()
 					'rpi2steamdeck': preset_rpi2steamdeck()
+			'--video':
+				if value.to_lower() in ['off', '0', 'false', 'f', 'n', 'no']:
+					open_video_stream_upon_connection = false
 
 	#
 	assert(is_client != is_server)

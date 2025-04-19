@@ -15,9 +15,8 @@ var byte_count :int = 0
 var frame_count :int = 0
 var one_second_timer := Timer.new()
 
-@onready var input_man: InputManager = find_child('input-man')
-@onready var stream_man: StreamManager = find_child('stream-man')
-@onready var message_dispatcher: Node = find_child('message-dispatcher')
+var input_man: InputManager
+var stream_man: StreamManager
 
 func _log(text :String) -> void :
 	print('[CLI] '+text)
@@ -30,6 +29,11 @@ func _log(text :String) -> void :
 
 
 func _ready() -> void :
+	stream_man = find_child('stream-man', true, false)
+	assert(stream_man!=null)
+	input_man = find_child('input-man', true, false)
+	assert(input_man!=null)
+	input_man.log.connect(_log)
 	## self init
 	name = 'client_root'
 	DisplayServer.set_icon(preload('res://asset/icon.client.png').get_image())
@@ -43,6 +47,7 @@ func _ready() -> void :
 	SignalBus.signals.log.connect(_log)
 	SignalBus.signals.new_command.connect(_on_new_command)
 	SignalBus.RegisterCommandHandler(-Command.NAME.PING, _on_pong)
+	_setup_debug_buttons()
 
 	# stats timer
 	add_child(one_second_timer)
@@ -53,7 +58,48 @@ func _ready() -> void :
 	connection_status_label.text = 'Connecting...'
 	get_tree().create_timer(1).timeout.connect(_connect)
 
-func _on_chrono_timer() -> void :
+func _setup_debug_buttons() -> void:
+	var debug_buttons_panel: Panel = %'debug-buttons-panel'
+	debug_buttons_panel.hide()
+	var show_hide_debug_button_btn: Button = %'show-hide-debug-button-btn'
+	show_hide_debug_button_btn.toggled.connect(
+		func(toggled_on :bool)->void:
+			if toggled_on: debug_buttons_panel.show()
+			else: debug_buttons_panel.hide()
+	)
+	var balast_settings: MenuButton = %'balast-settings'
+	balast_settings.get_popup().id_pressed.connect(_on_balast_debug_button_item_pressed)
+	var reverse_motors: MenuButton = %'reverse-motors'
+	reverse_motors.get_popup().id_pressed.connect(_on_reverse_motors_debug_button_item_pressed)
+
+func _on_balast_debug_button_item_pressed(item_id :int) -> void:
+	match item_id:
+		0:
+			_log('balast.set_minimum()')
+			SignalBus.signals.new_command.emit(Command.NAME.BALAST_SET_MIMIMUM, {})
+		1:
+			_log('balast.set_maximum()')
+			SignalBus.signals.new_command.emit(Command.NAME.BALAST_SET_MAXIMUM, {})
+		2:
+			_log('balast.stop()')
+			input_man.stop_balast()
+		3:
+			_log('balast.reset_balast_calibration()')
+			input_man.reset_balast_calibration()
+
+func _on_reverse_motors_debug_button_item_pressed(item_id :int) -> void:
+	var payload := {}
+	match item_id:
+		0:
+			payload['propulsion'] = true
+		1:
+			payload['rotation'] = true
+		2:
+			payload['balast'] = true
+	_log('reverse motors(%s)'%[payload])
+	SignalBus.signals.new_command.emit(Command.NAME.REVERSE_MOTORS, payload)
+
+func _on_chrono_timer() -> void:
 	byte_count_label.text = String.humanize_size(stream_man.byte_count)
 	stream_man.byte_count = 0
 	frame_count_label.text = '%s/%s'%[

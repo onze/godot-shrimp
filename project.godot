@@ -32,7 +32,7 @@ window/vsync/vsync_mode=0
 
 [editor]
 
-run/main_run_args="--audio-driver Dummy -- --client --preset=rpi2desktop"
+run/main_run_args="--audio-driver Dummy -- --client --preset=rpi2desktop --video=off"
 
 [editor_plugins]
 

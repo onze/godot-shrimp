@@ -49,6 +49,9 @@ static func RegisterCommandHandler(command :int, callback :Callable) -> void:
 	registered_signal.connect(callback)
 
 static func Dispatch(payload :Dictionary) -> void:
+	'''
+	Dispatch a payload to local handlers.
+	'''
 	var command :int = payload.get('_type', Command.NAME.NOOP)
 	var signal_name := _MakeSignalName(command)
 	if not __command_register.has_signal(signal_name):

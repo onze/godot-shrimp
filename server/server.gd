@@ -26,10 +26,13 @@ func _on_ping(params :Dictionary) -> void :
 	SignalBus.signals.new_command.emit(-Command.NAME.PING, params)
 
 func _update_status() -> void :
+	'''
+	Log its status on stdout, and sends an UPDATE command to the client.
+	'''
 	var items := PackedStringArray()
 	# timestamp
 	var time_data := Time.get_time_dict_from_system()
-	items.append('[%s:%s:%s]'%[time_data['hour'], time_data['minute'], time_data['second']])
+	items.append('[%02d:%02d:%02d]'%[time_data['hour'], time_data['minute'], time_data['second']])
 
 	# connection status
 	if peers.is_empty() :
@@ -42,10 +45,14 @@ func _update_status() -> void :
 			peers.size(),
 			'' if peers.size() < 2 else 's',
 		])
-
+	items.append('bal V: %.2f E: %.2f < %.2f < %.2f'%[
+		motor_manager.balast_motor.value,
+		motor_manager._min_balast_energy,
+		motor_manager._balast_energy,
+		motor_manager._max_balast_energy,
+	])
 	# keep last
 	print('[SRV]  | '.join(items))
-
 
 func _setup_server() -> void :
 	print('[SRV] setting up frame server...')

@@ -2,7 +2,7 @@ MKFILE_PATH := $(abspath $(lastword $(MAKEFILE_LIST)))
 ROOT_DIR := $(abspath ${MKFILE_PATH}/..)
 
 SHELL:=/bin/bash
-GODOT:=/media/data/tmp_persistent/apps/godot/Godot_v4.4-beta3_linux.x86_64
+GODOT:=/media/data/tmp_persistent/apps/godot/godot
 
 .ONESHELL:
 .PHONY: build push run
@@ -51,7 +51,7 @@ endef
 
 run_client:
 	echo 'export DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$$UID/bus' > /tmp/goshrimp.run
-	echo 'systemd-run --user ./goshrimp -- --client --preset=rpi2steamdeck 2> goshrimp.run.log' >> /tmp/goshrimp.run
+	echo 'systemd-run --user ./goshrimp -- --client --preset=rpi2steamdeck $(ARGS) 2> goshrimp.run.log' >> /tmp/goshrimp.run
 	echo 'SERVICE_NAME=$$(cat goshrimp.run.log | grep -Eo 'run-[0-9.a-z]+')' >> /tmp/goshrimp.run
 	echo 'trap "systemctl --user stop $$SERVICE_NAME && exit 0" INT' >> /tmp/goshrimp.run
 	echo 'read' >> /tmp/goshrimp.run

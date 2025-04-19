@@ -1,6 +1,7 @@
-[gd_scene load_steps=8 format=3 uid="uid://dux786c1gq54s"]
+[gd_scene load_steps=9 format=3 uid="uid://dux786c1gq54s"]
 
 [ext_resource type="Script" uid="uid://b675tlubu3g75" path="res://client/client.gd" id="1_6t3qf"]
+[ext_resource type="Texture2D" uid="uid://7ss7qfabo36o" path="res://asset/mdi--eye-outline.png" id="2_4c3tf"]
 [ext_resource type="Texture2D" uid="uid://c4t0sx66a0b5c" path="res://asset/arrow.png" id="2_7kp2r"]
 [ext_resource type="Texture2D" uid="uid://da68wgdxprtaj" path="res://asset/empty_circle.png" id="2_mgmel"]
 [ext_resource type="Texture2D" uid="uid://dxniy2uhknrs8" path="res://asset/filled_circle.png" id="3_7kp2r"]
@@ -64,6 +65,70 @@ alignment = 2
 [node name="spacer" type="Control" parent="debug menu/bottom menu/status"]
 layout_mode = 2
 size_flags_vertical = 3
+
+[node name="debug-buttons" type="HBoxContainer" parent="debug menu/bottom menu/status"]
+layout_mode = 2
+
+[node name="show-hide-debug-button-btn" type="Button" parent="debug menu/bottom menu/status/debug-buttons"]
+unique_name_in_owner = true
+layout_mode = 2
+toggle_mode = true
+button_mask = 7
+text = "      "
+icon = ExtResource("2_4c3tf")
+icon_alignment = 1
+expand_icon = true
+
+[node name="debug-buttons-panel" type="Panel" parent="debug menu/bottom menu/status/debug-buttons"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="debug menu/bottom menu/status/debug-buttons/debug-buttons-panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="balast-settings" type="MenuButton" parent="debug menu/bottom menu/status/debug-buttons/debug-buttons-panel/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "balast"
+item_count = 5
+popup/item_0/text = "set maximum"
+popup/item_0/id = 1
+popup/item_1/text = "set minimum"
+popup/item_1/id = 0
+popup/item_2/id = 4
+popup/item_2/separator = true
+popup/item_3/text = "reset calibration"
+popup/item_3/id = 3
+popup/item_4/text = "stop"
+popup/item_4/id = 2
+
+[node name="VSeparator" type="VSeparator" parent="debug menu/bottom menu/status/debug-buttons/debug-buttons-panel/HBoxContainer"]
+layout_mode = 2
+
+[node name="reverse-motors" type="MenuButton" parent="debug menu/bottom menu/status/debug-buttons/debug-buttons-panel/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "reverse motors"
+item_count = 3
+popup/item_0/text = "propulsion"
+popup/item_0/id = 0
+popup/item_1/text = "rotation"
+popup/item_1/id = 1
+popup/item_2/text = "balast"
+popup/item_2/id = 2
+
+[node name="VSeparator2" type="VSeparator" parent="debug menu/bottom menu/status/debug-buttons/debug-buttons-panel/HBoxContainer"]
+layout_mode = 2
+
+[node name="spacer" type="Control" parent="debug menu/bottom menu/status/debug-buttons/debug-buttons-panel/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="Panel" type="Panel" parent="debug menu/bottom menu/status"]
 custom_minimum_size = Vector2(0, 30)
@@ -180,8 +245,26 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
+[node name="VBoxContainer" type="VBoxContainer" parent="virtual joystick/HBoxContainer"]
+layout_mode = 2
+
+[node name="balast-positive-energy-slider" type="ProgressBar" parent="virtual joystick/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+max_value = 1.0
+fill_mode = 3
+show_percentage = false
+
+[node name="balast-negative-energy-slider" type="ProgressBar" parent="virtual joystick/HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+max_value = 1.0
+fill_mode = 2
+show_percentage = false
+
 [node name="depth-slider" type="VSlider" parent="virtual joystick/HBoxContainer"]
 layout_mode = 2
+min_value = -1.0
 max_value = 1.0
 step = 0.01
 editable = false

@@ -32,7 +32,7 @@ func _stop_libcamera() -> void:
 	if err != OK:
 		printerr('[SRV] Could not kill libcamera process: %s/%s'%[err, error_string(err)])
 		return
-	if process_thread != null and process_thread.is_alive():
+	if process_thread != null:
 		process_thread.wait_to_finish()
 	process_thread = null
 	DirAccess.remove_absolute(PID_FILE)

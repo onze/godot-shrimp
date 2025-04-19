@@ -21,8 +21,9 @@ var _connection_tt_s :float = -1
 var _buffer := PackedByteArray()
 
 func _ready() -> void:
-	SignalBus.signals.connected.connect(_request_stream)
-	SignalBus.signals.disconnected.connect(_disconnect)
+	if Settings.instance.open_video_stream_upon_connection:
+		SignalBus.signals.connected.connect(_request_stream)
+		SignalBus.signals.disconnected.connect(_disconnect)
 	SignalBus.RegisterCommandHandler(
 		-Command.NAME.REQUEST_VIDEO_STREAM,
 		_request_video_stream_response,
@@ -47,6 +48,10 @@ func _handle_connection_error(reason :String) -> void:
 
 func _request_stream() -> void:
 	'''ask the server to open a libcamera stream for us'''
+	if Settings.instance.disable_video_stream:
+		video_loading_label.text = 'running without a video stream'
+		SignalBus.log('Running without a video stream')
+		return
 	SignalBus.signals.new_command.emit(
 		Command.NAME.REQUEST_VIDEO_STREAM, {
 			width=Settings.instance.stream_resolution.x,
