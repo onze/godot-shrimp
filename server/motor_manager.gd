@@ -57,14 +57,10 @@ func _ready() -> void:
 
 func _initalize_motors(_args := {}) -> void:
 	var settings := Settings.instance
+
 	# no access to gpio on desktop
-	var use_mock_motors := settings.server_host != settings.RPI_IP
-	if use_mock_motors:
-		propulsion_motor = MockMotor.new(null, null)
-		rotation_motor = MockMotor.new(null, null)
-		balast_motor = MockMotor.new(null, null)
-		_reload_motors_directions()
-		return
+	if [Settings.DESKTOP_IP].has(settings.server_host):
+		sbc = ggpio.SBC.Mock()
 
 	chip = sbc.open_chip(settings.ggpio_chipid)
 	var chip_info := chip.get_info()
